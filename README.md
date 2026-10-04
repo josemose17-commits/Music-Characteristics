@@ -40,3 +40,9 @@ Any of these are used when present (others are ignored):
 | Voice | `Voice`, `Vocals` | `Female` |
 
 Only Python 3 is needed; there are no extra packages to install.
+
+## Web version
+
+`web/index.html` is the same analyzer as a web page: upload your CSV in the
+browser and the report appears right there. Nothing is uploaded anywhere; the
+file is read in your browser.

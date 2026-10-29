@@ -1,0 +1,9 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {parseGames,playerColor,moveLoss,classify,lineSAN,aggregate} from '../src/analysis.js';
+const p='[Event "Test"]\n[White "Jojo"]\n[Black "Opponent"]\n[Result "1-0"]\n\n1. e4 e5 2. Bc4 Nc6 3. Qh5 Nf6 4. Qxf7# 1-0';
+test('PGN parses legal complete games, rejects incomplete and malformed inputs',()=>{assert.equal(parseGames(p)[0].moves.length,7);assert.throws(()=>parseGames(p.replace('Nf6','Qzz')));assert.throws(()=>parseGames(p.replaceAll('1-0','*')));assert.equal(parseGames(p+'\n\n'+p.replace('Jojo','AnotherPlayer')) .length,2)});
+test('player matching is explicit and case-insensitive',()=>{const h=parseGames(p)[0].headers;assert.equal(playerColor(h,'jojo','auto'),'w');assert.equal(playerColor(h,'missing','auto'),null);assert.equal(playerColor(h,'','b'),'b');assert.throws(()=>playerColor(h,'','auto'))});
+test('evaluation perspective: before score plus after opponent score',()=>{assert.equal(moveLoss({cp:80},{cp:170}),250);assert.equal(moveLoss({cp:-80},{cp:-170}),0);assert.equal(moveLoss({cp:-300},{cp:300}),0);assert.ok(moveLoss({cp:0},{mate:2})>9000);assert.equal(moveLoss({mate:-2},{mate:2}),0)});
+test('engine line and broad forcing category use legal chess positions',()=>{const m=parseGames(p)[0].moves;assert.equal(lineSAN(m[6].before,['h5f7']),'Qxf7#');assert.equal(classify(m[6].before,'h5f7',m[5].before,'a1a8'),'Missed forcing move')});
+test('one game is one affected game, not a recurring weakness by number of moves',()=>{const event={tag:'Other decision errors',loss:200};const g=aggregate([{id:'a',label:'test',reviewed:20,events:[event,event]}]);assert.equal(g.groups[0].games,1);assert.equal(g.groups[0].count,2);assert.equal(g.moves,20)});
+
+test('duplicate games do not inflate recurrence',()=>assert.throws(()=>parseGames(p+'\n\n'+p),/Duplicate/));

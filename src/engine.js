@@ -1,0 +1,8 @@
+export class Engine{
+ constructor(){this.worker=new Worker(new URL('./engine/stockfish-18-lite-single.js',location.href));this.listener=null;this.worker.onmessage=e=>this.listener?.(String(e.data));this.worker.onerror=()=>this.reject?.(Error('Stockfish could not load. Check that WebAssembly is supported and try reloading.'));}
+ wait(command,done,timeout=45000){return new Promise((resolve,reject)=>{let t;const finish=(error,line)=>{clearTimeout(t);this.listener=null;this.reject=null;error?reject(error):resolve(line)};this.reject=error=>finish(error);t=setTimeout(()=>{this.worker.terminate();finish(Error('Engine timed out. Retry with a smaller batch.'))},timeout);this.listener=line=>{if(done(line))finish(null,line)};this.worker.postMessage(command)})}
+ async init(){await this.wait('uci',s=>s==='uciok');this.worker.postMessage('setoption name Hash value 32');await this.wait('isready',s=>s==='readyok')}
+ close(){this.reject?.(Error('Analysis stopped.'));this.worker.terminate()}
+}
+// Position is synchronous UCI input; the final bestmove delimits each search.
+Engine.prototype.evaluate=async function(fen,depth){this.worker.postMessage('position fen '+fen);let last=null;await this.wait('go depth '+depth,line=>{if(line.startsWith('info ')&&/\bscore (cp|mate) /.test(line)&&/\bpv /.test(line)&&!/(lowerbound|upperbound)/.test(line)){const m=line.match(/score (cp|mate) (-?\d+)/),d=line.match(/\bdepth (\d+)/);last={[m[1]]:+m[2],depth:d?+d[1]:0,pv:line.split(' pv ')[1].trim().split(/\s+/)}}return line.startsWith('bestmove ')});if(!last)throw Error('Engine returned no evaluation.');return last};

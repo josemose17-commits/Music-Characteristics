@@ -1,48 +1,24 @@
-# Music Characteristics: Cyanite playlist analyzer
+# Chess Improvement Lab
 
-Cyanite analyzes one song at a time. This tool takes the Cyanite results for
-every song in a playlist and analyzes the **playlist as a whole**.
+Replaces the Music Characteristics web page with completed-game chess review. Import PGN (up to 20 games / 2 MB), Lichess public games, or recent Chess.com archives. Select your exact player name or a fixed color. No games have been analyzed for you until you import them. The labeled demo is never personal evidence.
 
-## How to use
+## Run
 
-1. Analyze your playlist's songs on [cyanite.ai](https://cyanite.ai).
-2. Export the results to CSV (or copy them into a spreadsheet and save it as
-   CSV), one row per song. See `example_playlist.csv` for the layout.
-3. Run:
+Node 22+: `npm ci`, `npm test`, `npm run build`, `npm run dev`. Open the served page, not a file:// URL. `dist/` is the website. All analysis uses the locally served Stockfish 18 lite single-threaded worker (depth 10/14); no analysis service receives PGNs. Account import makes requests to the selected platform. Platform failures show errors and PGN remains available.
 
-   ```
-   python3 playlist_analyzer.py my_playlist.csv
-   ```
+Engine comparisons evaluate the position before and after each selected-player move with consistent depth. Scores are oriented to the player; at least 100cp loss creates a review candidate. Mate scores are separate transitions, not actual centipawn values. Thresholds, phase labels and coaching categories are app heuristics. Checks/captures in engine leading moves support broad forcing-move labels; this does not prove a fork, pin, hanging piece, opening-theory error or clock-management diagnosis.
 
-You get a summary in the terminal and an HTML report
-(`my_playlist_report.html`) you can open in a browser.
+Findings show real positions, actual moves, engine alternatives, opponent replies and short practice habits. Candidate-move drills accept legal moves and distinguish the engine's first move without falsely marking every alternative wrong. A single game is not called a recurring weakness. Review batches stay separate with dates/depth for comparison; history exports as JSON. Only completed standard chess is supported. Automatic imports are bounded to 20 games (Chess.com: last three available archive months).
 
-## What it reports
+## Deployment and naming
 
-- **Overall vibe**: the main moods, genres, tempo and energy
-- **Mix breakdowns**: genre, subgenre, mood, character, movement, instruments, keys, voice
-- **BPM range** and **energy flow** across the current track order
-- **Songs that don't fit**: tracks whose tempo, energy, genre or mood stand out, and why
-- **Suggested order**: smoother transitions in key (Camelot wheel), BPM and energy
+The page title and product branding are Chess Improvement Lab. The GitHub repository remains `Music-Characteristics` so its source identity/old URLs are retained. The new Pages workflow validates PRs without deployment; pushes to the existing default branch deploy `dist/` when GitHub Pages is configured for Actions. No repository rename or hosting-settings mutation is attempted.
 
-## CSV columns
+The original Python music tool and CSV are preserved in `legacy/`; prior web content remains in Git history. Chess storage uses its own `chessImprovementLab.v1` key. Unreadable or future data is not automatically overwritten. User-initiated Clear only removes this chess key.
 
-Column names are matched loosely, so a Cyanite export should work as-is.
-Any of these are used when present (others are ignored):
+## Dependencies and source
 
-| Field | Example header names | Example values |
-|---|---|---|
-| Title / Artist | `Title`, `Track`, `File name` / `Artist` | |
-| BPM | `BPM`, `Tempo` | `98` |
-| Key | `Key` | `A minor`, `C#m`, `aMinor`, `Bb` |
-| Energy | `Energy Level`, `Energy` | `Low` … `Very High`, or `0.7` / `70%` |
-| Genre, Subgenre, Mood, Character, Movement, Instruments | same names | comma-separated tags, e.g. `Dark, Chilled` |
-| Voice | `Voice`, `Vocals` | `Female` |
+- chess.js 1.4.0 (BSD-2-Clause): https://github.com/jhlywa/chess.js
+- Stockfish.js 18.0.8 / Stockfish 18 (GPL-3.0): https://github.com/nmrugg/stockfish.js/tree/v18.0.8
 
-Only Python 3 is needed; there are no extra packages to install.
-
-## Web version
-
-`web/index.html` is the same analyzer as a web page: upload your CSV in the
-browser and the report appears right there. Nothing is uploaded anywhere; the
-file is read in your browser.
+Stockfish is an unmodified separately loaded worker. Its license and corresponding source link ship in `dist/engine/`. Lockfile pins packages. No other runtime network dependency is required after page assets load. The lite engine is depth-limited, not an exhaustive proof of best play.

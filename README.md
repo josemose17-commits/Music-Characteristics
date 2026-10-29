@@ -22,3 +22,9 @@ The original Python music tool and CSV are preserved in `legacy/`; prior web con
 - Stockfish.js 18.0.8 / Stockfish 18 (GPL-3.0): https://github.com/nmrugg/stockfish.js/tree/v18.0.8
 
 Stockfish is an unmodified separately loaded worker. Its license and corresponding source link ship in `dist/engine/`. Lockfile pins packages. No other runtime network dependency is required after page assets load. The lite engine is depth-limited, not an exhaustive proof of best play.
+
+## Explanation-first lessons
+
+Each review candidate is now replayed through chess.js to generate a position-specific lesson: what you played, the legal opponent response, why the line matters, the engine alternative, and a practice habit. Immediate mates are verified as checkmate; material-loss examples count the shown short exchange using conventional piece values, separately from engine evaluation. A blocking explanation is given only when the alternative actually occupies the relevant sliding-piece line. Quiet comparisons explicitly decline unsupported named causes or claims about the player's thoughts.
+
+Main reports display up to three worked examples per pattern immediately; remaining examples stay accessible. Distinct-game counts distinguish a recurring pattern from a single-game observation. Every example has a board walkthrough (before / after your move / reply / alternative) and an optional answer-hidden exercise. New reports retain the next move actually played; historical and engine-only replies are worded differently. Existing saved reviews gain explanations without reanalysis when their stored positions/moves verify. Invalid saved examples decline a diagnosis.
